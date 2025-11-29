@@ -1,18 +1,11 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-WORKDIR /src
-
-# COPY ["TodoApi/TodoApi.csproj", "TodoApi/"]
-COPY ["TodoApi/", "TodoApi/"]
-RUN dotnet restore "TodoApi/TodoApi.csproj"
-
+WORKDIR /app
 COPY . .
-RUN dotnet build "TodoApi/TodoApi.csproj" -c Release -o /app/build
-
-FROM build AS publish
-RUN dotnet publish "TodoApi/TodoApi.csproj" -c Release -o /app/publish
+RUN dotnet restore TodoApi/TodoApi.csproj
+RUN dotnet publish TodoApi/TodoApi.csproj -c Release -o out
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
-COPY --from=publish /app/publish .
-EXPOSE 80 443
-ENTRYPOINT ["dotnet", "TodoApi.dll"]
+COPY --from=build /app/out .
+EXPOSE 80
+CMD ["dotnet", "TodoApi.dll"]
