@@ -1,15 +1,24 @@
 using Microsoft.EntityFrameworkCore;
 using TodoApi;
 
+// var builder = WebApplication.CreateBuilder(args);
 var builder = WebApplication.CreateBuilder(args);
 
-// ✅ רישום ה־DbContext
+builder.Configuration.AddEnvironmentVariables();
+
 builder.Services.AddDbContext<ToDoDbContext>(options =>
     options.UseMySql(
         builder.Configuration.GetConnectionString("ToDoDB"),
         new MySqlServerVersion(new Version(8, 0, 33))
     )
 );
+// ✅ רישום ה־DbContext
+// builder.Services.AddDbContext<ToDoDbContext>(options =>
+//     options.UseMySql(
+//         builder.Configuration.GetConnectionString("ToDoDB"),
+//         new MySqlServerVersion(new Version(8, 0, 33))
+//     )
+// );
 
 // ✅ הוספת CORS לאפליקציה (מאפשר ל-frontend לגשת לשרת)
 builder.Services.AddCors(options =>
