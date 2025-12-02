@@ -163,7 +163,7 @@ using Microsoft.Extensions.FileProviders;
 using TodoApi;
 
 // ===============================
-// 📌 קריאה למשתני סביבה
+// 📌 קריאה למשתני סביבה ל־DB
 // ===============================
 var dbServer = Environment.GetEnvironmentVariable("DB_SERVER") ?? "localhost";
 var dbPort = Environment.GetEnvironmentVariable("DB_PORT") ?? "3306";
@@ -213,4 +213,75 @@ app.UseCors("AllowAll");
 // 📌 תמיכה בקבצים סטטיים
 // ===============================
 // אם יש React build בתוך ClientApp/build
-var staticFilesPath = Path.Combine(Directory.GetCurrentDirectory(), "C
+var staticFilesPath = Path.Combine(Directory.GetCurrentDirectory(), "ClientApp", "build");
+
+if (Directory.Exists(staticFilesPath))
+{
+    app.UseDefaultFiles();
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = new PhysicalFileProvider(staticFilesPath),
+        RequestPath = ""
+    });
+}
+else
+{
+    // fallback ל־wwwroot
+    app.UseDefaultFiles();
+    app.UseStaticFiles();
+}
+
+// ===============================
+// 📌 נתיב ברירת מחדל
+// ===============================
+app.MapGet("/", () => "✅ Todo API is running...");
+
+// ===============================
+// 📌 CRUD עבור המשימות
+// ===============================
+app.MapGet("/items", async (ToDoDbContext db) => await db.Items.ToListAsync());
+
+app.MapPost("/items", async (ToDoDbContext db, Item item) =>
+{
+    db.Items.Add(item);
+    await db.SaveChangesAsync();
+    return Results.Created($"/items/{item.Id}", item);
+});
+
+app.MapPut("/items/{id}", async (ToDoDbContext db, int id, Item updatedItem) =>
+{
+    var item = await db.Items.FindAsync(id);
+    if (item == null) return Results.NotFound();
+
+    item.Name = updatedItem.Name;
+    item.IsComplete = updatedItem.IsComplete;
+    await db.SaveChangesAsync();
+
+    return Results.Ok(item);
+});
+
+app.MapDelete("/items/{id}", async (ToDoDbContext db, int id) =>
+{
+    var item = await db.Items.FindAsync(id);
+    if (item == null) return Results.NotFound();
+
+    db.Items.Remove(item);
+    await db.SaveChangesAsync();
+    return Results.Ok();
+});
+
+// ===============================
+// 📌 Port דינמי – חובה בענן
+// ===============================
+var port = Environment.GetEnvironmentVariable("PORT");
+if (string.IsNullOrEmpty(port))
+{
+    throw new Exception("🚨 PORT environment variable is missing! Render / Cloud requires this.");
+}
+
+app.Urls.Add($"http://*:{port}");
+
+// ===============================
+// 📌 הפעלת השרת
+// ===============================
+app.Run();
