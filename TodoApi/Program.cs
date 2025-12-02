@@ -7,7 +7,8 @@ var builder = WebApplication.CreateBuilder(args);
 // ===============================
 // 📌 קריאת ConnectionString מ-Render
 // ===============================
-var connectionString = Environment.GetEnvironmentVariable("ConnectionString") 
+var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
+    ?? Environment.GetEnvironmentVariable("ConnectionString") 
     ?? Environment.GetEnvironmentVariable("DATABASE_URL")
     ?? Environment.GetEnvironmentVariable("CONNECTIONSTRING");
 
