@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // const apiUrl = "http://localhost:5278";
-const apiUrl = process.env.REACT_APP_API_URL || "https://todolist-server-k66i.onrender.com";
+const apiUrl = process.env._REACT_APP_API_URL ;
 
 
 export default {
