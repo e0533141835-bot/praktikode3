@@ -20,11 +20,7 @@ if (string.IsNullOrEmpty(connectionString))
 builder.Services.AddDbContext<ToDoDbContext>(options =>
     options.UseMySql(connectionString, 
         new MySqlServerVersion(new Version(8, 0, 33)),
-        mysqlOptions => mysqlOptions.EnableRetryOnFailure(
-            maxRetryCount: 3,
-            maxRetryDelayTimeSpan: TimeSpan.FromSeconds(5),
-            errorNumbersToAdd: null
-        )
+        mysqlOptions => mysqlOptions.EnableRetryOnFailure(3)
     )
 );
 
