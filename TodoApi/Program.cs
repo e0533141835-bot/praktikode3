@@ -315,13 +315,17 @@ builder.Services.AddDbContext<ToDoDbContext>(options =>
     options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 33)))
 );
 
+
 // ===============================
-// 📌 CORS – אפשר ל־frontend
+// 📌 CORS – פתוח (כמו בפרויקט שעובד)
+
+
+
 // ===============================
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowFrontend", policy =>
-        policy.WithOrigins("https://todolist-frontend-zrkx.onrender.com") // כתובת ה־frontend
+    options.AddPolicy("AllowAll", policy =>
+        policy.AllowAnyOrigin()
               .AllowAnyMethod()
               .AllowAnyHeader());
 });
@@ -331,7 +335,7 @@ var app = builder.Build();
 // ===============================
 // 📌 הפעלת CORS
 // ===============================
-app.UseCors("AllowFrontend");
+app.UseCors("AllowAll");
 
 // ===============================
 // 📌 תמיכה בקבצים סטטיים (React build או wwwroot)
