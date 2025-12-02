@@ -7,12 +7,23 @@ var builder = WebApplication.CreateBuilder(args);
 // ===============================
 // 📌 קריאת ConnectionString מ-Render
 // ===============================
-var connectionString = Environment.GetEnvironmentVariable("ConnectionString");
+var connectionString = Environment.GetEnvironmentVariable("ConnectionString") 
+    ?? Environment.GetEnvironmentVariable("DATABASE_URL")
+    ?? Environment.GetEnvironmentVariable("CONNECTIONSTRING");
 
 if (string.IsNullOrEmpty(connectionString))
 {
-    throw new Exception("🚨 ConnectionString environment variable is missing! Render requires this.");
+    // Fallback - בנה את ה-connection string מחלקים
+    var dbServer = Environment.GetEnvironmentVariable("DB_SERVER") ?? "localhost";
+    var dbPort = Environment.GetEnvironmentVariable("DB_PORT") ?? "3306";
+    var dbName = Environment.GetEnvironmentVariable("DB_DATABASE") ?? "ToDoDb";
+    var dbUser = Environment.GetEnvironmentVariable("DB_USER") ?? "root";
+    var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD") ?? "";
+    
+    connectionString = $"Server={dbServer};Port={dbPort};Database={dbName};User={dbUser};Password={dbPassword};";
 }
+
+Console.WriteLine($"✅ Connection String Ready: {(connectionString.Length > 0 ? "Yes" : "No")}");
 
 // ===============================
 // 📌 DbContext עם Retry Logic
