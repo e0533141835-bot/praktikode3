@@ -39,9 +39,12 @@ builder.Services.AddDbContext<ToDoDbContext>(options =>
 // ===============================
 // 📌 CORS – אפשר ל־frontend
 // ===============================
+
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowFrontend", policy =>
+    options.AddPolicy("MyAllowSpecificOrigins", policy =>
         policy.WithOrigins("https://todolist-frontend-zrkx.onrender.com")
               .AllowAnyMethod()
               .AllowAnyHeader());
@@ -74,6 +77,9 @@ else
     app.UseStaticFiles();
 }
 
+
+app.UseCors(MyAllowSpecificOrigins);
+
 // ===============================
 // 📌 Health Check
 // ===============================
@@ -87,6 +93,8 @@ app.MapGet("/health", async (ToDoDbContext db) =>
         return Results.Ok(new { status = "healthy", database = "connected" });
     }
     catch
+
+
     {
         return Results.StatusCode(500);
     }
