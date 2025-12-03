@@ -4,9 +4,7 @@ using TodoApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ===============================
-// 📌 קריאת ConnectionString מ-Render
-// ===============================
+// --- Connection string logic (שמרתי כמו שלך) ---
 var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
     ?? Environment.GetEnvironmentVariable("ConnectionString") 
     ?? Environment.GetEnvironmentVariable("DATABASE_URL")
@@ -14,7 +12,6 @@ var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__De
 
 if (string.IsNullOrEmpty(connectionString))
 {
-    // Fallback - בנה את ה-connection string מחלקים
     var dbServer = Environment.GetEnvironmentVariable("DB_SERVER") ?? "localhost";
     var dbPort = Environment.GetEnvironmentVariable("DB_PORT") ?? "3306";
     var dbName = Environment.GetEnvironmentVariable("DB_DATABASE") ?? "ToDoDb";
@@ -26,9 +23,7 @@ if (string.IsNullOrEmpty(connectionString))
 
 Console.WriteLine($"✅ Connection String Ready: {(connectionString.Length > 0 ? "Yes" : "No")}");
 
-// ===============================
-// 📌 DbContext עם Retry Logic
-// ===============================
+// --- DbContext ---
 builder.Services.AddDbContext<ToDoDbContext>(options =>
     options.UseMySql(connectionString, 
         new MySqlServerVersion(new Version(8, 0, 33)),
@@ -36,30 +31,26 @@ builder.Services.AddDbContext<ToDoDbContext>(options =>
     )
 );
 
-// ===============================
-// 📌 CORS – אפשר ל־frontend
-// ===============================
-
-var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+// --- CORS: השתמש בשם מדיניות מוגדר פעם אחת בלבד ---
+var corsPolicyName = "AllowFrontend";
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("MyAllowSpecificOrigins", policy =>
-        policy.WithOrigins("https://todolist-frontend-zrkx.onrender.com")
+    options.AddPolicy(name: corsPolicyName, policy =>
+    {
+        policy.WithOrigins("https://todolist-frontend-zrkx.onrender.com") // שם הדומיין של ה-frontend
               .AllowAnyMethod()
-              .AllowAnyHeader());
+              .AllowAnyHeader();
+              // אם אתה צריך cookies: .AllowCredentials() ותוודא שה-frontend שולח credentials
+    });
 });
 
 var app = builder.Build();
 
-// ===============================
-// 📌 הפעלת CORS
-// ===============================
-app.UseCors("AllowFrontend");
+// שים UseCors פעם אחת, לפני ה־MapGet/MapPost וכו'
+app.UseCors(corsPolicyName);
 
-// ===============================
-// 📌 תמיכה בקבצים סטטיים (React build או wwwroot)
-// ===============================
+// --- סטטיים / ClientApp כמו שהיה ---
 var staticFilesPath = Path.Combine(Directory.GetCurrentDirectory(), "ClientApp", "build");
 
 if (Directory.Exists(staticFilesPath))
@@ -77,12 +68,7 @@ else
     app.UseStaticFiles();
 }
 
-
-app.UseCors(MyAllowSpecificOrigins);
-
-// ===============================
-// 📌 Health Check
-// ===============================
+// --- Endpoints ---
 app.MapGet("/", () => "✅ Todo API is running...");
 
 app.MapGet("/health", async (ToDoDbContext db) =>
@@ -93,25 +79,17 @@ app.MapGet("/health", async (ToDoDbContext db) =>
         return Results.Ok(new { status = "healthy", database = "connected" });
     }
     catch
-
-
     {
         return Results.StatusCode(500);
     }
 });
 
-// ===============================
-// 📌 CRUD עבור המשימות
-// ===============================
-
-// GET - קבל את כל המשימות
 app.MapGet("/items", async (ToDoDbContext db) =>
 {
     var items = await db.Items.ToListAsync();
     return Results.Ok(items);
 });
 
-// POST - יצור משימה חדשה
 app.MapPost("/items", async (ToDoDbContext db, Item item) =>
 {
     db.Items.Add(item);
@@ -119,7 +97,6 @@ app.MapPost("/items", async (ToDoDbContext db, Item item) =>
     return Results.Created($"/items/{item.Id}", item);
 });
 
-// PUT - עדכן משימה קיימת
 app.MapPut("/items/{id}", async (ToDoDbContext db, int id, Item updatedItem) =>
 {
     var item = await db.Items.FindAsync(id);
@@ -133,7 +110,6 @@ app.MapPut("/items/{id}", async (ToDoDbContext db, int id, Item updatedItem) =>
     return Results.Ok(item);
 });
 
-// DELETE - מחק משימה
 app.MapDelete("/items/{id}", async (ToDoDbContext db, int id) =>
 {
     var item = await db.Items.FindAsync(id);
@@ -145,13 +121,7 @@ app.MapDelete("/items/{id}", async (ToDoDbContext db, int id) =>
     return Results.Ok(new { message = "Item deleted successfully" });
 });
 
-// ===============================
-// 📌 Port דינמי – חובה בRender
-// ===============================
 var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
 app.Urls.Add($"http://*:{port}");
 
-// ===============================
-// 📌 הפעלת השרת
-// ===============================
 app.Run();
