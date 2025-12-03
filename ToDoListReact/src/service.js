@@ -1,8 +1,9 @@
 import axios from 'axios';
 
 // const apiUrl = "http://localhost:5278";
-const apiUrl = process.env.REACT_APP_API_URL ;
+const apiUrl = process.env._REACT_APP_API_URL ;
 
+console.log("API URL:", apiUrl);
 
 export default {
   // שליפת כל המשימות
@@ -22,6 +23,8 @@ export default {
     } catch (error) {
       console.error("❌ Error adding task:", error);
       return null;
+
+
     }
   },
 
