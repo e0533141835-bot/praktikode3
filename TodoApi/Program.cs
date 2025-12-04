@@ -213,23 +213,23 @@ app.UseCors(corsPolicy);
 // ===============================
 // 📌 Static Files (אם יש React build) - **נשאר כפי שהיה, אך מומלץ לוודא את נתיב ה-Build**
 // ===============================
-var staticFilesPath = Path.Combine(Directory.GetCurrentDirectory(), "ClientApp", "build");
+// var staticFilesPath = Path.Combine(Directory.GetCurrentDirectory(), "ClientApp", "build");
 
-if (Directory.Exists(staticFilesPath))
-{
-    app.UseDefaultFiles();
-    app.UseStaticFiles(new StaticFileOptions
-    {
-        FileProvider = new PhysicalFileProvider(staticFilesPath),
-        RequestPath = ""
-    });
-}
-else
-{
-    // אם ה-Frontend מופרד (ואין תיקיית build), אנו עדיין רוצים קבצים סטטיים מה-wwwroot הסטנדרטי
-    app.UseDefaultFiles();
-    app.UseStaticFiles();
-}
+// if (Directory.Exists(staticFilesPath))
+// {
+//     app.UseDefaultFiles();
+//     app.UseStaticFiles(new StaticFileOptions
+//     {
+//         FileProvider = new PhysicalFileProvider(staticFilesPath),
+//         RequestPath = ""
+//     });
+// }
+// else
+// {
+//     // אם ה-Frontend מופרד (ואין תיקיית build), אנו עדיין רוצים קבצים סטטיים מה-wwwroot הסטנדרטי
+//     app.UseDefaultFiles();
+//     app.UseStaticFiles();
+// }
 
 // ===============================
 // 📌 Health Check
