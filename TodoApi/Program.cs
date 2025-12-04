@@ -252,7 +252,9 @@ app.MapGet("/health", async (ToDoDbContext db) =>
     }
     catch
     {
+        Console.WriteLine("wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww");
         return Results.StatusCode(500);
+
     }
 });
 

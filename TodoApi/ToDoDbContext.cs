@@ -71,13 +71,13 @@ public partial class ToDoDbContext : DbContext
 
     // =================================================================
     // ⚠️ קטע זה הוסר כדי לאפשר ל-Program.cs להגדיר את החיבור באופן בלעדי
-    // protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    // {
-    //     if (!optionsBuilder.IsConfigured)
-    //     {
-    //         optionsBuilder.UseMySql("name=ToDoDB", Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.0.44-mysql"));
-    //     }
-    // }
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        if (!optionsBuilder.IsConfigured)
+        {
+            optionsBuilder.UseMySql("name=ToDoDB", Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.0.44-mysql"));
+        }
+    }
     // =================================================================
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
