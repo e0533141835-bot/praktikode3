@@ -3,7 +3,7 @@ import axios from 'axios';
 // const apiUrl = "http://localhost:5278";
 const apiUrl = "https://todolist-server-k66i.onrender.com" ;
 
-console.log("API URL:", apiUrl);
+// console.log("API URL:", apiUrl);
 
 export default {
   // שליפת כל המשימות
