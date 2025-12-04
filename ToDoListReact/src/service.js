@@ -1,66 +1,10 @@
-// import axios from 'axios';
-
-// // const apiUrl = "http://localhost:5278";
-// const apiUrl = "https://todolist-server-k66i.onrender.com" ;
-
-// // console.log("API URL:", apiUrl);
-
-// export default {
-//   // שליפת כל המשימות
-//   getTasks: async () => {
-//     const result = await axios.get(`${apiUrl}/items`);
-//     return result.data;
-//   },
-
-//   // הוספת משימה
-//   addTask: async (name) => {
-//     try {
-//       const result = await axios.post(`${apiUrl}/items`, {
-//         name,
-//         isComplete: false
-//       });
-//       return result.data;
-//     } catch (error) {
-//       console.error("❌ Error adding task:", error);
-//       return null;
-      
-//     }
-//   },
-
-//   // עדכון סטטוס של משימה
-//   setCompleted: async (id, isComplete, name) => {
-//     try {
-//       const result = await axios.put(`${apiUrl}/items/${id}`, {
-//         name,
-//         isComplete
-//       });
-//       return result.data;
-//     } catch (error) {
-//       console.error("❌ Error updating task:", error);
-//       return null;
-//     }
-//   },
-
-//   // מחיקת משימה
-//   deleteTask: async (id) => {
-//     try {
-//       const result = await axios.delete(`${apiUrl}/items/${id}`);
-//       return result.data;
-//     } catch (error) {
-//       console.error("❌ Error deleting task:", error);
-//       return null;
-//     }
-//   }
-// };
 import axios from 'axios';
 
-// משתמשים ב-URL מהסביבה אם קיים, אחרת נופלים ל-localhost
-const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:5000";
+const apiUrl = process.env.REACT_APP_API_URL;
 
 console.log("Using API URL:", apiUrl);
 
 export default {
-  // שליפת כל המשימות
   getTasks: async () => {
     try {
       const result = await axios.get(`${apiUrl}/items`);
@@ -71,7 +15,6 @@ export default {
     }
   },
 
-  // הוספת משימה
   addTask: async (name) => {
     try {
       const result = await axios.post(`${apiUrl}/items`, {
@@ -85,7 +28,6 @@ export default {
     }
   },
 
-  // עדכון סטטוס של משימה
   setCompleted: async (id, isComplete, name) => {
     try {
       const result = await axios.put(`${apiUrl}/items/${id}`, {
@@ -99,7 +41,6 @@ export default {
     }
   },
 
-  // מחיקת משימה
   deleteTask: async (id) => {
     try {
       const result = await axios.delete(`${apiUrl}/items/${id}`);

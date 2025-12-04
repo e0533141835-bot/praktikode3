@@ -13,19 +13,18 @@ function App() {
   async function createTodo(e) {
     e.preventDefault();
     await service.addTask(newTodo);
-    setNewTodo("");//clear input
-    await getTodos();//refresh tasks list (in order to see the new one)
+    setNewTodo("");
+    await getTodos();
   }
 
   async function updateCompleted(todo, isComplete) {
-    // await service.setCompleted(todo.id, isComplete);
     await service.setCompleted(todo.id, isComplete, todo.name);
-    await getTodos();//refresh tasks list (in order to see the updated one)
+    await getTodos();
   }
 
   async function deleteTodo(id) {
     await service.deleteTask(id);
-    await getTodos();//refresh tasks list
+    await getTodos();
   }
 
   useEffect(() => {
@@ -42,7 +41,7 @@ function App() {
       </header>
       <section className="main" style={{ display: "block" }}>
         <ul className="todo-list">
-          {todos.map(todo => {
+          {todos &&todos.map(todo => {
             return (
               <li className={todo.isComplete ? "completed" : ""} key={todo.id}>
                 <div className="view">
