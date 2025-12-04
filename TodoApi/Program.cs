@@ -145,27 +145,22 @@
 // // ===============================
 // app.Run();
 
-
-
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
-using MySql.Data.MySqlClient; // הוספת Using זה לוודא ש-MySqlException נגיש במקרה הצורך
+using MySql.Data.MySqlClient;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 using TodoApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // ===============================
-// 📌 קריאת ConnectionString מהקונפיגורציה
+// 📌 Connection String
 // ===============================
-// קורא מ: 1. ConnectionStrings:DefaultConnection ב-appsettings.json
-//       2. משתנה סביבה: ConnectionStrings__DefaultConnection (ב-Render)
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 if (string.IsNullOrEmpty(connectionString))
 {
     Console.WriteLine("❌ ERROR: Connection String 'DefaultConnection' not found in configuration.");
-    // זריקת חריגה מונעת הרצה במצב לא מוגדר
     throw new InvalidOperationException("Connection String 'DefaultConnection' not found. Check appsettings.json or environment variables (e.g., ConnectionStrings__DefaultConnection).");
 }
 
@@ -177,31 +172,24 @@ Console.WriteLine(connectionString);
 // ===============================
 builder.Services.AddDbContext<ToDoDbContext>(options =>
 {
-    // ודא שגרסת ה-MySQL תואמת למה שמוגדר ב-Clever Cloud.
-    // אם לא יודעים, 8.0.33 היא הנחה סבירה.
     options.UseMySql(connectionString,
-        new MySqlServerVersion(new Version(8, 0, 33)), 
+        new MySqlServerVersion(new Version(8, 0, 33)),
         mysql => mysql.EnableRetryOnFailure(3)
     );
 });
 
 // ===============================
-// 📌 CORS – שם אחד קבוע!
+// 📌 CORS – React Frontend
 // ===============================
 var corsPolicy = "AllowFrontend";
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(corsPolicy, policy =>
-        policy.WithOrigins("https://todolist-frontend-zrkx.onrender.com")
+        policy.WithOrigins("https://todolist-frontend-zrkx.onrender.com") // Frontend URL
               .AllowAnyMethod()
               .AllowAnyHeader());
 });
-
-// ===============================
-// 📌 הוספת תמיכה במינימל API (אם צריך)
-// builder.Services.AddEndpointsApiExplorer();
-// ===============================
 
 var app = builder.Build();
 
@@ -209,27 +197,6 @@ var app = builder.Build();
 // 📌 הפעלת CORS
 // ===============================
 app.UseCors(corsPolicy);
-
-// ===============================
-// 📌 Static Files (אם יש React build) - **נשאר כפי שהיה, אך מומלץ לוודא את נתיב ה-Build**
-// ===============================
-// var staticFilesPath = Path.Combine(Directory.GetCurrentDirectory(), "ClientApp", "build");
-
-// if (Directory.Exists(staticFilesPath))
-// {
-//     app.UseDefaultFiles();
-//     app.UseStaticFiles(new StaticFileOptions
-//     {
-//         FileProvider = new PhysicalFileProvider(staticFilesPath),
-//         RequestPath = ""
-//     });
-// }
-// else
-// {
-//     // אם ה-Frontend מופרד (ואין תיקיית build), אנו עדיין רוצים קבצים סטטיים מה-wwwroot הסטנדרטי
-//     app.UseDefaultFiles();
-//     app.UseStaticFiles();
-// }
 
 // ===============================
 // 📌 Health Check
@@ -240,26 +207,22 @@ app.MapGet("/health", async (ToDoDbContext db) =>
 {
     try
     {
-        // בדיקה אמיתית ע"י ניסיון קריאה לבסיס הנתונים
         await db.Items.FirstOrDefaultAsync();
         return Results.Ok(new { status = "healthy", database = "connected" });
     }
     catch (MySqlException ex)
     {
-        // הצגת שגיאה מפורטת יותר במקרה של כשל בחיבור לבסיס הנתונים
         Console.WriteLine($"❌ Database connection failed: {ex.Message}");
         return Results.StatusCode(500);
     }
     catch
     {
-        Console.WriteLine("wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww");
         return Results.StatusCode(500);
-
     }
 });
 
 // ===============================
-// 📌 CRUD
+// 📌 CRUD Endpoints
 // ===============================
 
 app.MapGet("/items", async (ToDoDbContext db) =>
@@ -303,5 +266,4 @@ app.MapDelete("/items/{id}", async (ToDoDbContext db, int id) =>
 var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
 app.Urls.Add($"http://*:{port}");
 
-// ===============================
 app.Run();
